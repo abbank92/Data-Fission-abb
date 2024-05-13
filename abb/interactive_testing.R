@@ -18,6 +18,7 @@ source('STAR_code/STAR_convex.R')
 args <- commandArgs(trailingOnly=TRUE)
 tau <- as.numeric(args[1])
 seed <- as.numeric(args[2])
+print(paste("tau:", tau, "seed:", seed))
 set.seed(seed)
 
 alt <- 2
