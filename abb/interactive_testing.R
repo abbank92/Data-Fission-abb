@@ -17,12 +17,13 @@ source('STAR_code/STAR_convex.R')
 # Set variables (temp)
 args <- commandArgs(trailingOnly=TRUE)
 tau <- as.numeric(args[1])
-set.seed(tau*10)
+seed <- as.numeric(args[2])
+set.seed(seed)
 
 alt <- 2
 null <- 0
-grid_size <- 25
-n.repeat <- 50
+grid_size <- 50
+n.repeat <- 100
 
 n <- grid_size**2
 x1 <- seq(-100, 100, length.out = grid_size)
@@ -42,9 +43,6 @@ mu <- ifelse(H0, alt, null)
 # Now load the scripts to use instantiated variables
 source('interactive_testing_helpers.R')
 
-# Run the experiment once
-# runtime <- system.time(out <- interactive_testing_exp(1, debug=TRUE))
-
 # Run the experiment n.repeat times
 print_suppress <- function(idx){
   print(paste("Running trial", idx))
@@ -60,5 +58,11 @@ wrapper_fn <- function(idx) {
                     return(list())
                   })
 }
-interactive_testing_res <- mclapply(1:n.repeat, wrapper_fn, mc.cores=detectCores())
-save(file=paste0("abb_results/it_results/interactive_tau_",tau,".Rdata"), interactive_testing_res)
+
+# Run the experiment once
+runtime <- system.time(out <- wrapper_fn(-1))
+print(runtime)
+save(file=paste0("abb_results/it_results/sample_exp.Rdata"), out)
+
+# interactive_testing_res <- mclapply(1:n.repeat, wrapper_fn, mc.cores=detectCores())
+# save(file=paste0("abb_results/it_results/interactive_tau_",tau,"_seed_",seed,".Rdata"), interactive_testing_res)
