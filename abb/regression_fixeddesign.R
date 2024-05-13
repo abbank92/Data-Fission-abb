@@ -201,9 +201,6 @@ for (type in c('fission', 'split', 'full')) {
 
 
 
-
-
-
 # Figure 7 
 
 # Set up parameters

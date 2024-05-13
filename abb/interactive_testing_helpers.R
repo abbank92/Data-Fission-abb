@@ -158,8 +158,8 @@ interactive_testing_exp <- function(idx, debug=FALSE) {
   STAR.result.fission <- summary.STAR(STAR.obj2, H0, g_Y, mu, var_fission)
   adapt.result.fission <- summary.AdaPT(AdaPT.obj2, H0, pvals, g_Y, mu, var_fission)
   
-  return(list(x=x,mu=mu,tau=tau,H0=H0,mu=mu,alt=alt,null=null,type=type,var=var,var_fission=var_fission,
-              Y=Y, f_Y=f_Y,g_Y=g_Y,pvals=pvals,pvals_fission=pvals_fission,
+  return(list(x=x,mu=mu,tau=tau,H0=H0,mu=mu,alt=alt,null=null,var=var,var_fission=var_fission,
+              Y=Y,f_Y=f_Y,g_Y=g_Y,pvals=pvals,pvals_fission=pvals_fission,
               BH.result.fission=BH.result.fission, BH.result.full=BH.result_full,
               adapt.result.fission=adapt.result.fission,adapt.result.full=adapt.result_full,
               STAR.result.fission=STAR.result.fission, STAR.result.full = STAR.result_full,
@@ -168,3 +168,61 @@ interactive_testing_exp <- function(idx, debug=FALSE) {
 }
 
 
+# Functions to generate plots
+compute_trial_stats <- function(one.exp) {
+  alpha.FCR <- 0.2
+  alpha.list <- seq(0.01, 0.3, 0.02)
+  
+  q <- nrow(one.exp$x)
+  pvals <- one.exp$pvals
+  n <- length(pvals)
+  pvals_fission <- one.exp$pvals_fission
+  tau <- one.exp$tau
+  
+  BH_full_CI <- sapply(alpha.list, function(x) {
+    khat <- max(c(0, which(sort(pvals) <= alpha*(1:n)/n)))
+    alpha <- alpha * khat / n
+    x <- which(pvals < alpha)
+    nrej <- length(x)
+    if (nrej == 0) return(rep(NaN, 5))
+    alpha.2 <- alpha.FCR*nrej/q
+    ci_u <- one.exp$Y[x] + qnorm(1-alpha.FCR/2)
+    ci_l <- one.exp$Y[x] - qnorm(1-alpha.FCR/2)
+    cov <- (one.exp$mu[x] <= ci_u) & (one.exp$mu[x] >= ci_l)
+    ret <- c(mean(one.exp$mu[x]),
+             mean(one.exp$Y[x]),
+             sum(cov),
+             length(cov),
+             mean(ci_u-ci_l))
+    return(ret)
+  })
+  
+  ada_full_CI <- apply(one.exp$AdaPT.full.object$s, 2, function(s) {
+    return(1)
+  })
+  
+  return(list(bh.f.ci = BH_full_CI))
+}
+
+gen_plot_df <- function(it_tau) {
+  tmp <- (one.exp$pvals <= s)  
+  x <- (one.exp$pvals_fission <= s)
+}
+
+
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for (tau in seq(0.1, 0.9, 0.1)) {
+  load(paste0('abb_results/it_results/interactive_tau_',tau,'.Rdata'))
+  assign(paste0('it_tau', tau*10), interactive_testing_res)
+}
+
+
+
+
+create_plots <- FALSE
+if (create_plots) {
+
+}

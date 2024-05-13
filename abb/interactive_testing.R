@@ -22,7 +22,7 @@ set.seed(tau*10)
 alt <- 2
 null <- 0
 grid_size <- 25
-n.repeat <- 20
+n.repeat <- 50
 
 n <- grid_size**2
 x1 <- seq(-100, 100, length.out = grid_size)
@@ -46,12 +46,19 @@ source('interactive_testing_helpers.R')
 # runtime <- system.time(out <- interactive_testing_exp(1, debug=TRUE))
 
 # Run the experiment n.repeat times
+print_suppress <- function(idx){
+  print(paste("Running trial", idx))
+  sink('/dev/null')
+  out <- interactive_testing_exp(idx)
+  sink()
+  return(out)
+}
 wrapper_fn <- function(idx) {
-  res <- tryCatch(interactive_testing_exp(idx),
+  res <- tryCatch(print_suppress(idx),
                   error=function(e){
                     print(e)
                     return(list())
                   })
 }
-interactive_testing_res <- mclapply(1:n.repeat, wrapper_fn)
-save(file=paste0("abb_results/interactive_tau_",tau,".Rdata"), interactive_testing_res)
+interactive_testing_res <- mclapply(1:n.repeat, wrapper_fn, mc.cores=detectCores())
+save(file=paste0("abb_results/it_results/interactive_tau_",tau,".Rdata"), interactive_testing_res)
